@@ -6,8 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Webcomponents</title>
     <script type="module" src="/src/my-element.ts"></script>
+    <script type="module" src="/src/candle-chart.ts"></script>
+    <script type="module" src="/src/test_candle-chart.ts"></script>
   </head>
   <body>
-    <my-element></my-element>
+    <!-- <my-element></my-element> -->
+    <candle-chart precision="0.00001"></candle-chart>
   </body>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      height: 100vh;
+    }
+  </style>
 </html>

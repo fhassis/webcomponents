@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lightweight-charts": "^4.0.1",
     "lit": "^2.6.1"
   },
   "devDependencies": {
