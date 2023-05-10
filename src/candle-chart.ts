@@ -28,10 +28,7 @@ export class CandleChart extends LitElement {
 	orders: IOrder[] = [];
 	chart: IChartApi | null = null;
 	candleSeries: ISeriesApi<"Candlestick"> | null = null;
-	orderLines: Map<
-		string,
-		{ entry: IPriceLine; sl: IPriceLine | null; tp: IPriceLine | null }
-	> = new Map();
+	priceLines: Map<String, IPriceLine> = new Map();
 	clickThreshold = 0.0003;
 	selectedLine: IPriceLine | null = null;
 	offset: number | null = null;
@@ -108,45 +105,56 @@ export class CandleChart extends LitElement {
 	};
 
 	setOrders = (pOrders: IOrder[]) => {
-		// saves the orders array
-		this.orders = pOrders;
 
 		// creates new line objects for each order
 		pOrders.forEach((order) => {
-			this.orderLines.set(order.id, {
-				entry: this.candleSeries!.createPriceLine(
-					this.createOrderLine(order, "ENTRY")
-				),
-				sl:
-					order.sl !== 0.0
-						? this.candleSeries!.createPriceLine(
-								this.createOrderLine(order, "SL")
-						  )
-						: null,
-				tp:
-					order.tp !== 0.0
-						? this.candleSeries!.createPriceLine(
-								this.createOrderLine(order, "TP")
-						  )
-						: null,
-			});
+
+			const isBuy = order.type === "BUY_LIMIT";
+
+			// creates the entry price line
+			const lineId = `EN${order.id}`;
+			this.priceLines.set(
+				lineId, 
+				this.candleSeries!.createPriceLine(
+					this.createOrderLine(order.price, isBuy, lineId)
+				)
+			);
+
+			// creates the SL price line
+			if (order.sl !== 0.0) {
+				const lineId = `SL${order.id}`;
+				this.priceLines.set(
+					lineId, 
+					this.candleSeries!.createPriceLine(
+						this.createOrderLine(order.sl, isBuy, lineId)
+					)
+				);
+			}
+
+			// creates the TP price line
+			if (order.tp !== 0.0) {
+				const lineId = `TP${order.id}`;
+				this.priceLines.set(
+					lineId,
+					this.candleSeries!.createPriceLine(
+						this.createOrderLine(order.tp, isBuy, lineId)
+					)
+				);
+			}
 		});
 	};
 
 	// creates a line options object according to order parameters
-	createOrderLine = (
-		order: IOrder,
-		lineType: "ENTRY" | "SL" | "TP"
-	): PriceLineOptions => {
+	createOrderLine = (price: number, isBuy: boolean, lineId: string): PriceLineOptions => {
 		return {
-			id: `${order.id}_${lineType}`,
-			price: order.price,
-			color: order.type === "BUY_LIMIT" ? "blue" : "black",
+			id: lineId,
+			price: price,
+			color: isBuy ? "blue" : "black",
 			lineWidth: 1,
 			lineStyle: LineStyle.LargeDashed,
-			lineVisible: lineType == "ENTRY" ? true : false,
+			lineVisible: true,
 			axisLabelVisible: false,
-			title: lineType === "ENTRY" ? order.id : `${lineType}_${order.id}`,
+			title: lineId,
 			axisLabelColor: "",
 			axisLabelTextColor: "",
 		};
@@ -160,15 +168,10 @@ export class CandleChart extends LitElement {
 		const maxPrice = clickedPrice * (1 + this.clickThreshold);
 
 		// check the order lines
-		for (const order of this.orders) {
-			if (order.price >= minPrice && order.price <= maxPrice) {
-				return this.orderLines.get(order.id)!.entry;
-			}
-			if (order.sl >= minPrice && order.sl <= maxPrice) {
-				return this.orderLines.get(order.id)!.sl;
-			}
-			if (order.tp >= minPrice && order.tp <= maxPrice) {
-				return this.orderLines.get(order.id)!.tp;
+		for (const [_, priceLine] of this.priceLines.entries()) {
+			const orderPrice = priceLine.options().price;
+			if (orderPrice >= minPrice && orderPrice <= maxPrice) {
+				return priceLine;
 			}
 		}
 
