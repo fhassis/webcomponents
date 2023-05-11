@@ -86,14 +86,10 @@ export class CandleChart extends LitElement {
 				// changes settings if a line is selected
 				if (this.selectedLine) {
 					this.configChart(true);
-					this.chart!.subscribeCrosshairMove(
-						this.crosshairMoveHandler
-					);
+					this.chart!.subscribeCrosshairMove(this.crosshairMoveHandler);
 				} else {
 					this.configChart(false);
-					this.chart!.unsubscribeCrosshairMove(
-						this.crosshairMoveHandler
-					);
+					this.chart!.unsubscribeCrosshairMove(this.crosshairMoveHandler);
 				}
 			}
 		});
@@ -105,16 +101,14 @@ export class CandleChart extends LitElement {
 	};
 
 	setOrders = (pOrders: IOrder[]) => {
-
 		// creates new line objects for each order
 		pOrders.forEach((order) => {
-
 			const isBuy = order.type === "BUY_LIMIT";
 
 			// creates the entry price line
 			const lineId = `EN${order.id}`;
 			this.priceLines.set(
-				lineId, 
+				lineId,
 				this.candleSeries!.createPriceLine(
 					this.createOrderLine(order.price, isBuy, lineId)
 				)
@@ -124,7 +118,7 @@ export class CandleChart extends LitElement {
 			if (order.sl !== 0.0) {
 				const lineId = `SL${order.id}`;
 				this.priceLines.set(
-					lineId, 
+					lineId,
 					this.candleSeries!.createPriceLine(
 						this.createOrderLine(order.sl, isBuy, lineId)
 					)
@@ -145,7 +139,11 @@ export class CandleChart extends LitElement {
 	};
 
 	// creates a line options object according to order parameters
-	createOrderLine = (price: number, isBuy: boolean, lineId: string): PriceLineOptions => {
+	createOrderLine = (
+		price: number,
+		isBuy: boolean,
+		lineId: string
+	): PriceLineOptions => {
 		return {
 			id: lineId,
 			price: price,
