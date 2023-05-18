@@ -53,7 +53,8 @@ export class CandleChart extends LitElement {
 
 		// initialize the candlestick series
 		this.candleSeries = this.chart.addCandlestickSeries({
-			priceFormat: { type: "price", minMove: this.precision },
+			priceFormat: { type: "price" },
+			// priceFormat: { type: "price", minMove: this.precision },
 		});
 
 		// handles clicks in chart
@@ -74,16 +75,17 @@ export class CandleChart extends LitElement {
 					this.configPriceLine(clickedLine, true);
 					this.dispatchEvent(
 						new CustomEvent("line-clicked", {
-							detail: clickedLine,
+							detail: clickedLine.options()!.id,
 							bubbles: true,
 							composed: true,
 						})
 					);
 				} else {
                     if (this.wasDragging) {
+                        const lineOptions = this.selectedLine?.options()!;
                         this.dispatchEvent(
                             new CustomEvent("line-dragged", {
-                                detail: this.selectedLine,
+                                detail: {id: lineOptions.id, price: lineOptions.price },
                                 bubbles: true,
                                 composed: true,
                             })
