@@ -53,8 +53,7 @@ export class CandleChart extends LitElement {
 
 		// initialize the candlestick series
 		this.candleSeries = this.chart.addCandlestickSeries({
-			priceFormat: { type: "price" },
-			// priceFormat: { type: "price", minMove: this.precision },
+			priceFormat: { type: "price", minMove: this.precision },
 		});
 
 		// handles clicks in chart
