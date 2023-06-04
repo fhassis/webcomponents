@@ -32,7 +32,6 @@ export class CandleChart extends LitElement {
 	clickThreshold = 0.0003;
 	selectedLine: IPriceLine | null = null;
 	offset: number | null = null;
-    wasDragging = false;
 
 	firstUpdated() {
 		// // gets a reference of the chart div element
@@ -79,19 +78,7 @@ export class CandleChart extends LitElement {
 							composed: true,
 						})
 					);
-				} else {
-                    if (this.wasDragging) {
-                        const lineOptions = this.selectedLine?.options()!;
-                        this.dispatchEvent(
-                            new CustomEvent("line-dragged", {
-                                detail: {id: lineOptions.id, price: lineOptions.price },
-                                bubbles: true,
-                                composed: true,
-                            })
-                        );
-                        this.wasDragging = false;
-                    }
-                }
+				}
 
 				// saves the previous clicked line status (some line or null)
 				this.selectedLine = clickedLine;
@@ -231,7 +218,6 @@ export class CandleChart extends LitElement {
 				}
 				newOptions.price = draggedPrice + this.offset;
 				this.selectedLine.applyOptions(newOptions);
-                this.wasDragging = true;
 			}
 		}
 	};

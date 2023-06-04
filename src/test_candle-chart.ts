@@ -13,9 +13,5 @@ candleChart.setCandles(candles);
 candleChart.setOrders(orders);
 
 candleChart.addEventListener("line-clicked", (event) => {
-    console.log(event.type, (<CustomEvent>event).detail);
-});
-
-candleChart.addEventListener("line-dragged", (event) => {
-    console.log(event.type, (<CustomEvent>event).detail);
+	console.log(event.type, (<CustomEvent>event).detail);
 });
