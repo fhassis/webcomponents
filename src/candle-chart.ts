@@ -16,7 +16,9 @@ import type {
 	IPriceLine,
 	ISeriesApi,
 } from "lightweight-charts";
-import type { ICandle, IOrder } from "./typings";
+import type { ICandle, IOrder, OrderType } from "./typings";
+
+type TypeId = OrderType | "SL" | "TP";
 
 @customElement("candle-chart")
 export class CandleChart extends LitElement {
@@ -78,6 +80,7 @@ export class CandleChart extends LitElement {
 							composed: true,
 						})
 					);
+					this.findRelatedLines(clickedLine.options().id!);
 				}
 
 				// saves the previous clicked line status (some line or null)
@@ -103,35 +106,33 @@ export class CandleChart extends LitElement {
 	setOrders = (pOrders: IOrder[]) => {
 		// creates new line objects for each order
 		pOrders.forEach((order) => {
-			const isBuy = order.type === "BUY_LIMIT";
-
 			// creates the entry price line
-			const lineId = `EN${order.id}`;
+			const lineId = this.formLineId(order.type, order.id);
 			this.priceLines.set(
 				lineId,
 				this.candleSeries!.createPriceLine(
-					this.createOrderLine(order.price, isBuy, lineId)
+					this.createOrderLine(order.price, order.type, lineId)
 				)
 			);
 
 			// creates the SL price line
 			if (order.sl !== 0.0) {
-				const lineId = `SL${order.id}`;
+				const lineId = this.formLineId("SL", order.id);
 				this.priceLines.set(
 					lineId,
 					this.candleSeries!.createPriceLine(
-						this.createOrderLine(order.sl, isBuy, lineId)
+						this.createOrderLine(order.sl, "SL", lineId)
 					)
 				);
 			}
 
 			// creates the TP price line
 			if (order.tp !== 0.0) {
-				const lineId = `TP${order.id}`;
+				const lineId = this.formLineId("TP", order.id);
 				this.priceLines.set(
 					lineId,
 					this.candleSeries!.createPriceLine(
-						this.createOrderLine(order.tp, isBuy, lineId)
+						this.createOrderLine(order.tp, "TP", lineId)
 					)
 				);
 			}
@@ -141,13 +142,13 @@ export class CandleChart extends LitElement {
 	// creates a line options object according to order parameters
 	createOrderLine = (
 		price: number,
-		isBuy: boolean,
+		lineType: TypeId,
 		lineId: string
 	): PriceLineOptions => {
 		return {
 			id: lineId,
 			price: price,
-			color: isBuy ? "blue" : "black",
+			color: this.getLineColor(lineType),
 			lineWidth: 1,
 			lineStyle: LineStyle.LargeDashed,
 			lineVisible: true,
@@ -219,6 +220,33 @@ export class CandleChart extends LitElement {
 				newOptions.price = draggedPrice + this.offset;
 				this.selectedLine.applyOptions(newOptions);
 			}
+		}
+	};
+
+	// forms the lineId based on price type and order id
+	formLineId = (typeId: TypeId, orderId: string) => {
+		return `${typeId}:${orderId}`;
+	};
+
+	// finds related lines of the clicked line
+	findRelatedLines = (lineId: string) => {
+		const [typeId, orderId] = lineId.split(":");
+		console.log(typeId, orderId);
+	};
+
+	// get the line color based on line type
+	getLineColor = (lineType: TypeId) => {
+		switch (lineType) {
+			case "SL":
+				return "#EF5350";
+			case "TP":
+				return "#26A69A";
+			case "BUY_LIMIT":
+			case "BUY_MARKET":
+				return "#2962FF";
+			case "SELL_LIMIT":
+			case "SELL_MARKET":
+				return "#EF5350";
 		}
 	};
 
